@@ -1,0 +1,47 @@
+local player = game:GetService("Players").LocalPlayer
+local humanoid = player.Character:WaitForChild("Humanoid")
+local balls = {}
+local master = player -- Define o jogador que executou o script como mestre dos exploits
+
+-- Função para alcançar nas pernas com quadril mais baixo
+local function reachLegs()
+    humanoid.HipHeight = -10 -- Diminui a altura do quadril para -10 para alcançar as pernas
+end
+
+-- Função para aumentar a velocidade da bola
+local function increaseBallSpeed(ball)
+    ball.Velocity = ball.Velocity * 2 -- Aumenta a velocidade da bola em 100%
+end
+
+-- Função para manipular o comportamento da bola ao bater no peito do jogador
+local function manipulateBallOnChest(ball, playerWhoKicked)
+    local function onTouched(hit)
+        if hit:IsA("Part") and hit.Parent == player.Character and ball.Velocity.magnitude > 0 then
+            local direction = (player.Character.HumanoidRootPart.Position - ball.Position).unit
+            ball.Velocity = direction * ball.Velocity.magnitude * 2 -- Aumenta a velocidade da bola em direção ao jogador
+        end
+    end
+    ball.Touched:Connect(onTouched)
+    if playerWhoKicked ~= master then
+        return -- Se o jogador que chutou a bola não for o mestre, não permitir manipulação
+    end
+    -- Manipulações adicionais quando o mestre chutar a bola
+    -- Por exemplo, lançar o jogador que chutou a bola
+    --[[ Adicione aqui o código para lançar o jogador ]]
+end
+
+-- Evento para detectar colisões do jogador com bolas
+humanoid.Touched:Connect(function(hit)
+    if hit:IsA("Model") and hit:FindFirstChild("Ball") then
+        local ball = hit:FindFirstChild("Ball")
+        local playerWhoKicked = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if not balls[ball] then
+            increaseBallSpeed(ball)
+            manipulateBallOnChest(ball, playerWhoKicked)
+            balls[ball] = true -- Marca esta bola como processada para evitar manipulação repetida
+        end
+    end
+end)
+
+-- Chamada da função para alcançar nas pernas com quadril mais baixo
+reachLegs()

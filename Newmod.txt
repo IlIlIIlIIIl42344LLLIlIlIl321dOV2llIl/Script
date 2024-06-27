@@ -1,0 +1,37 @@
+local player = game:GetService("Players").LocalPlayer
+local humanoid = player.Character:WaitForChild("Humanoid")
+
+local function reachLegs()
+    humanoid.HipHeight = -5 -- Diminui a altura do quadril para -5 para alcançar as pernas
+    humanoid.WalkSpeed = 150 -- Aumenta a velocidade de caminhada para 150 para um alcance mais eficaz
+    humanoid.Jump = true -- Permite ao personagem saltar como reação ao alcançar as pernas
+end
+
+reachLegs() -- Chama a função para alcançar as pernas
+local player = game:GetService("Players").LocalPlayer
+local ball = game:GetService("Workspace"):WaitForChild("Ball")
+
+-- Função para alcançar nas pernas
+local function reachLegs()
+    local humanoid = player.Character:WaitForChild("Humanoid")
+    humanoid.HipHeight = -5 -- Diminui a altura do quadril para -5 para alcançar as pernas
+end
+
+-- Função para manipular o comportamento padrão da bola ao bater na parede
+local function manipulateBall()
+    local ballWallScript = Instance.new("Script")
+    ballWallScript.Parent = ball
+    ballWallScript.Source = [[
+        local ball = script.Parent
+        ball.Touched:Connect(function(hit)
+            if hit:IsA("Part") and hit.Parent.Name == "Wall" then
+                -- Comportamento padrão da bola ao bater na parede
+                ball.Velocity = Vector3.new(0, 0, 0) -- A bola para completamente ao bater na parede
+            end
+        end)
+    ]]
+end
+
+-- Chamada das funções
+reachLegs() -- Alcançar nas pernas
+manipulateBall() -- Manipular o comportamento padrão da bola ao bater na parede

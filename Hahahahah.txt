@@ -1,0 +1,39 @@
+-- Função para destacar o jogador
+local function highlightPlayer(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    -- Destacar todo o jogador
+    local highlight = Instance.new("BoxHandleAdornment")
+    highlight.Size = character:GetExtentsSize()
+    highlight.Adornee = character
+    highlight.Parent = character
+end
+
+-- Função para adicionar propriedades Reach e React às pernas do jogador
+local function modifyLegs(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    -- Adicionar propriedades Reach e React às pernas
+    local leftLeg = character:FindFirstChild("Left Leg")
+    local rightLeg = character:FindFirstChild("Right Leg")
+    if leftLeg and rightLeg then
+        leftLeg.Reach = 10 -- Define a distância que a perna pode alcançar
+        rightLeg.Reach = 10
+        leftLeg.ReactType = Enum.ReactionType.None -- Define o tipo de reação da perna
+        rightLeg.ReactType = Enum.ReactionType.None
+    end
+end
+
+-- Loop através de todos os jogadores e aplicar as modificações
+for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+    highlightPlayer(player)
+    modifyLegs(player)
+end
+
+-- Lidar com novos jogadores que se juntarem ao jogo
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    highlightPlayer(player)
+    modifyLegs(player)
+end)

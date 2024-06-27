@@ -1,0 +1,68 @@
+local player = game:GetService("Players").LocalPlayer
+local humanoid = player.Character:WaitForChild("Humanoid")
+local balls = {}
+local master = player -- Definir o jogador que executou o script como mestre dos exploits
+local stopDistance = 10 -- Distância para fazer a bola parar quando o mestre se aproximar
+local reachDistance = 15 -- Distância máxima para alcançar as pernas
+local hipHeight = -15 -- Altura do quadril para alcançar as pernas
+
+-- Função para ajustar a altura do quadril e o alcance das pernas
+local function adjustHipAndReach()
+    humanoid.HipHeight = hipHeight
+    humanoid.HipWidth = reachDistance
+end
+
+-- Função para aumentar a velocidade da bola
+local function increaseBallSpeed(ball)
+    ball.Velocity = ball.Velocity * 2 -- Aumentar a velocidade da bola em 100%
+end
+
+-- Função para manipular o comportamento da bola ao bater no peito do jogador
+local function manipulateBallOnChest(ball, playerWhoKicked)
+    local function onTouched(hit)
+        if hit:IsA("Part") and hit.Parent == player.Character and ball.Velocity.magnitude > 0 then
+            local direction = (player.Character.HumanoidRootPart.Position - ball.Position).unit
+            ball.Velocity = direction * ball.Velocity.magnitude * 2 -- Aumentar a velocidade da bola em direção ao jogador
+        end
+    end
+    ball.Touched:Connect(onTouched)
+    if playerWhoKicked ~= master then
+        return -- Se o jogador que chutou a bola não for o mestre, não permitir manipulação
+    end
+    -- Manipulações adicionais quando o mestre chutar a bola
+    -- Por exemplo, lançar o jogador que chutou a bola
+    --[[ Adicione aqui o código para lançar o jogador ]]
+end
+
+-- Função para fazer a bola parar quando o mestre estiver perto dela
+local function stopBallWhenNear(ball)
+    local function checkDistance()
+        local distance = (ball.Position - player.Character.HumanoidRootPart.Position).magnitude
+        if distance < stopDistance then -- Faz a bola parar quando o mestre estiver perto dela
+            ball.Velocity = Vector3.new(0, 0, 0)
+        end
+    end
+    while wait(1) do -- Verifica a distância a cada segundo
+        checkDistance()
+    end
+end
+
+-- Evento para detectar colisões do jogador com bolas
+humanoid.Touched:Connect(function(hit)
+    if hit:IsA("Model") and hit:FindFirstChild("Ball") then
+        local ball = hit:FindFirstChild("Ball")
+        local playerWhoKicked = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if not balls[ball] then
+            balls[ball] = true -- Marcar esta bola como processada para evitar manipulação repetida
+            increaseBallSpeed(ball)
+            manipulateBallOnChest(ball, playerWhoKicked)
+            if playerWhoKicked == master then
+                coroutine.wrap(stopBallWhenNear)(ball)
+            end
+        end
+    end
+end)
+
+-- Chamada da função para ajustar a altura do quadril e o alcance das pernas
+adjustHipAndReach()
+
